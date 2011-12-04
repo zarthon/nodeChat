@@ -4,10 +4,21 @@ var http = require("http"),
 function start( route, handle ) {
     var server = http.createServer(function (request, response){
         console.log( "\nSERVER: New Request Received" );
-        var pathname = url.parse(request.url).pathname;
-        console.log("SERVER:Request for " + pathname + " received");
         
-        route(pathname, handle, response);
+        var postData = "";
+        var pathname = url.parse(request.url).pathname;
+        
+        console.log("SERVER:Request for " + pathname + " received");
+        request.setEncoding("utf8");
+
+        request.addListener("data", function(postDataChunk){
+            postData += postDataChunk;
+            console.log("SERVER: Received Post Data Chunk");
+        });
+
+        request.addListener("end", function(){
+            route(pathname, handle, response, postData);
+        });
         
     });
     server.listen(8000);
